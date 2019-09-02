@@ -1,0 +1,10 @@
+---
+
+  - import_role:
+    name: ansible-network.network-engine
+
+  - name: Parse show vlan command
+    cli:
+      command: show vlan brief
+      parser: "/etc/ansible/show_vlans/parsers/show_vlan_brief.yml"
+
