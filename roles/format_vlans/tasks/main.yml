@@ -1,0 +1,14 @@
+---
+
+ - name: Create dictionary
+   set_fact:
+       vlans: "{{ vlans|default([]) + [ {'vlan_id' : item.matches[0] , 'vlan_name' : item.matches[1] , 'status' : item.matches[2] } ] }}"
+   loop: "{{ section }}"
+
+ - name: Write Output to File
+   lineinfile:
+      path: ./vlans_data/vlans_summary_stage.yml
+      line: "--- \n\nvlans: \n{{ vlans|to_yaml }}"
+
+
+
