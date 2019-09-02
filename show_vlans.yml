@@ -1,0 +1,61 @@
+---
+
+  - name: Create capture environment
+    hosts: localhost
+
+    tasks:
+      - name: Create Capture Folder
+        file: path= vlans_data/ state=directory
+      
+      - name: Create Staging Capture File Summary 
+        copy:
+          content: ""
+          dest: ./vlans_data/vlans_summary_stage.yml
+          force: no
+
+      - name: Create Capture file summary
+        copy:
+          content: ""
+          dest: ./vlans_data/vlans_summary.yml
+          force: no
+
+  - name: Start vlan capture
+    hosts: test_host
+    gather_facts: no
+    vars_prompts:
+      - name: "username"
+        prompt: "Username" 
+        private: no
+      - name: "password"
+        prompt: "Password" 
+        private: yes
+
+    roles:
+      - vlan_brief
+      - format_vlans
+
+  - name: Clean Up Files
+    hosts: localhost
+
+    tasks:
+      - name: Remove quotations from file
+        replace:
+          path: ./vlans_data/vlans_summary_stage.yml
+          regexp: "(\')"
+          replace: ''      
+
+      - name: Run Python script to remove duplicates
+        script: ./no_dups.py
+        args:
+          executable: python3
+
+      - name: Delete Staging file
+        file: 
+          path: vlans_data/vlans_summary_stage.yml 
+          state: absent
+
+      - name: Delete Blank Spaces 
+        replace:
+          path: ./vlans_data/vlans_summary.yml
+          regexp: "(^\\n)"
+          replace: ''
